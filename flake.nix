@@ -29,11 +29,10 @@
 
         dontUnpack = true;
 
-        nativeBuildInputs = [
-          pkgs.autoPatchelfHook
-        ];
+        nativeBuildInputs =
+          pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [pkgs.autoPatchelfHook];
 
-        buildInputs = [
+        buildInputs = pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [
           pkgs.stdenv.cc.cc.lib
           pkgs.zlib
         ];
