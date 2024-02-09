@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'current.json'
+      - '**.nix'
+      - '**/flake.lock'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'current.json'
+      - '**.nix'
+      - '**/flake.lock'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  verify-nix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Nix
+      uses: cachix/install-nix-action@v22
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check flake formatting
+      run: nix run nixpkgs#alejandra -- -c .
+    - name: Check flake.nix
+      run: nix flake check --all-systems
+    - name: Check Nix flake Nixpkgs inputs
+      uses: DeterminateSystems/flake-checker-action@main
+    - name: Build flake
+      run: nix build
+    - name: Run flake
+      run: |
+        nix run .# -- -v
