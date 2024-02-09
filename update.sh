@@ -26,8 +26,7 @@ fi
 
 # Check for update necessity
 echo "Checking if an update is needed..."
-needs_update=$(jq -s '(.[0][0] | .published_at | fromdateiso8601) > (.[1] | .published_at | fromdateiso8601)' releases.json current.json)
-if [ $? -ne 0 ]; then
+if ! needs_update=$(jq -s '(.[0][0] | .published_at | fromdateiso8601) > (.[1] | .published_at | fromdateiso8601)' releases.json current.json) ; then
     echo "Error: Failed to compare release dates or parse JSON."
     exit 1
 fi
@@ -39,26 +38,22 @@ else
     echo "Update required. Processing..."
     hashes=""
     for row in $(jq -c '.[0].assets[] | select(.name | test("^pkl-(linux-amd64|linux-aarch64|macos-aarch64|macos-amd64)$")) | {name, browser_download_url}' releases.json); do
-        echo "Processing asset: $(echo $row | jq -r '.name')"
-        hash=$(nix-prefetch-url $(echo $row | jq -r '.browser_download_url') 2>/dev/null)
-        if [ $? -ne 0 ]; then
-            echo "Error: Failed to prefetch URL for $(echo $row | jq -r '.name'). Aborting..."
+        echo "Processing asset: $(echo "$row" | jq -r '.name')"
+        if ! hash=$(nix-prefetch-url "$(echo "$row" | jq -r '.browser_download_url')" 2>/dev/null); then
+            echo "Error: Failed to prefetch URL for $(echo "$row" | jq -r '.name'). Aborting..."
             exit 1
         fi
-        hash_json=$(echo $row | jq --arg hash "$hash" '{(.name | sub("^pkl-"; "")): $hash}')
-        if [ $? -ne 0 ]; then
+        if ! hash_json=$(echo "$row" | jq --arg hash "$hash" '{(.name | sub("^pkl-"; "")): $hash}'); then
             echo "Error: Failed to generate hash JSON. Aborting..."
             exit 1
         fi
-        hashes=$(echo $hashes $hash_json | jq -s 'add')
-        if [ $? -ne 0 ]; then
+        if ! hashes=$(echo "$hashes" "$hash_json" | jq -s 'add'); then
             echo "Error: Failed to aggregate hashes. Aborting..."
             exit 1
         fi
     done
     echo "Updating current.json..."
-    echo $hashes | jq -s '(.[0][0] | {tag_name, published_at}) * {platforms: .[1]}' releases.json - > current.json
-    if [ $? -eq 0 ]; then
+    if echo "$hashes" | jq -s '(.[0][0] | {tag_name, published_at}) * {platforms: .[1]}' releases.json - > current.json; then
         echo "Update successful."
     else
         echo "Error: Failed to update current.json."
