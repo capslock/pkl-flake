@@ -1,6 +1,10 @@
 {
   description = "A configuration as code language with rich validation and tooling";
 
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs";
+  };
+
   outputs = {
     self,
     nixpkgs,
