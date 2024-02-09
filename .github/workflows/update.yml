@@ -1,0 +1,51 @@
+name: Update Pkl Version
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '26 0 * * *'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    outputs: 
+      up-to-date: ${{ steps.check-updates.outputs.up-to-date }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Nix
+      uses: cachix/install-nix-action@v22
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check for updates
+      id: check-updates
+      run: |
+        bash update.sh
+        git diff-files --quiet
+        up-to-date=$?
+    - name: Check flake formatting
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      run: nix run nixpkgs#alejandra -- -c .
+    - name: Check flake.nix
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      run: nix flake check --all-systems
+    - name: Check Nix flake Nixpkgs inputs
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      uses: DeterminateSystems/flake-checker-action@main
+    - name: Build flake
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      run: nix build
+    - name: Run flake
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      run: |
+        nix run .# -- -v
+    - name: Create pull request
+      if: ${{ ! steps.check-updates.outputs.up-to-date }}
+      uses: peter-evans/create-pull-request@v6
+      with:
+        branch: auto-version-update
+        title: '[bot] Version Update'
+        body: |
+          Automated change to update the version of pkl in the flake.
+        commit-message: |
+          flake: Update pkl version.
+        reviewers: 'capslock'
