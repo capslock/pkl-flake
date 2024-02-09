@@ -6,16 +6,17 @@
     nixpkgs,
     ...
   }: let
-    archStrings = {
+    systemToPlatform = {
       x86_64-linux = "linux-amd64";
       aarch64-linux = "linux-aarch64";
       x86_64-darwin = "macos-amd64";
       aarch64-darwin = "macos-aarch64";
     };
+    current = builtins.fromJSON (builtins.readFile ./current.json);
     package = {
       pkgs,
       system,
-      version ? "0.25.1",
+      version,
       sha256,
     }:
       pkgs.stdenv.mkDerivation rec {
@@ -23,7 +24,7 @@
         inherit version;
 
         src = pkgs.fetchurl {
-          url = "https://github.com/apple/pkl/releases/download/${version}/pkl-${archStrings.${system}}";
+          url = "https://github.com/apple/pkl/releases/download/${version}/pkl-${systemToPlatform.${system}}";
           inherit sha256;
         };
 
@@ -62,12 +63,6 @@
         };
       };
     supportedSystems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
-    hashes = {
-      x86_64-linux = "sha256-j7QzBDQr0dY9HmDT3Pu/ds/cHdFf2M/VMf7FWe7L0z0=";
-      aarch64-linux = "sha256-40okn7pTy9zOgRNrCkfoUVmifirgr55L68R1n3LsPwE=";
-      x86_64-darwin = "sha256-HajWx+rKin785hgrudcDiwkqjkqIJCA6S6BXmjgE1So=";
-      aarch64-darwin = "sha256-7k4c9B0W/JgQQTnwzLJU+p+LeAy2Gg8Scx2jWmxl+d0=";
-    };
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     nixpkgsFor = forAllSystems (system:
       import nixpkgs {
@@ -79,7 +74,8 @@
         pkl = package {
           inherit system;
           pkgs = nixpkgsFor.${system};
-          sha256 = hashes.${system};
+          version = current.tag_name;
+          sha256 = current.platforms.${systemToPlatform.${system}};
         };
         default = pkl;
       }

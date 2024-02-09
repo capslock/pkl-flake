@@ -1,0 +1,10 @@
+{
+    "tag_name": "0.25.1",
+    "published_at": "2024-02-02T03:34:27Z",
+    "platforms": {
+        "linux-amd64": "sha256-j7QzBDQr0dY9HmDT3Pu/ds/cHdFf2M/VMf7FWe7L0z0=",
+        "linux-aarch64": "sha256-40okn7pTy9zOgRNrCkfoUVmifirgr55L68R1n3LsPwE=",
+        "macos-amd64": "sha256-HajWx+rKin785hgrudcDiwkqjkqIJCA6S6BXmjgE1So=",
+        "macos-aarch64": "sha256-7k4c9B0W/JgQQTnwzLJU+p+LeAy2Gg8Scx2jWmxl+d0="
+    }
+}
