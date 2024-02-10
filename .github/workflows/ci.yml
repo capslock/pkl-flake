@@ -18,6 +18,7 @@ on:
 
 jobs:
   verify-nix:
+    name: Verify Nix
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-14]
@@ -39,3 +40,10 @@ jobs:
     - name: Run flake
       run: |
         nix run .# -- -v
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master

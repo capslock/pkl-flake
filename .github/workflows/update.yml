@@ -21,7 +21,7 @@ jobs:
       run: |
         bash update.sh
         if ! git diff-files --quiet; then
-          up_to_date=1
+          echo "up_to_date=1" >> $GITHUB_OUTPUT
         fi
     - name: Check flake formatting
       if: ${{ ! steps.check-updates.outputs.up_to_date }}
