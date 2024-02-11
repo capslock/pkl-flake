@@ -21,26 +21,26 @@ jobs:
       run: |
         bash update.sh
         if ! git diff-files --quiet; then
-          echo "up_to_date=1" >> $GITHUB_OUTPUT
+          echo "up_to_date=true" >> $GITHUB_OUTPUT
         fi
     - name: Check flake formatting
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       run: nix run nixpkgs#alejandra -- -c .
     - name: Check flake.nix
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       run: nix flake check --all-systems
     - name: Check Nix flake Nixpkgs inputs
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       uses: DeterminateSystems/flake-checker-action@main
     - name: Build flake
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       run: nix build
     - name: Run flake
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       run: |
         nix run .# -- -v
     - name: Create pull request
-      if: ${{ ! steps.check-updates.outputs.up_to_date }}
+      if: ${{ steps.check-updates.outputs.up_to_date != 'true' }}
       uses: peter-evans/create-pull-request@v6
       with:
         branch: auto-version-update
