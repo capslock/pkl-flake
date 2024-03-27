@@ -20,7 +20,7 @@ jobs:
       id: check-updates
       run: |
         bash update.sh
-        if ! git diff-files --quiet; then
+        if git diff-files --quiet; then
           echo "up_to_date=true" >> $GITHUB_OUTPUT
         fi
     - name: Check flake formatting
