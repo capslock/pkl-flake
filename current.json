@@ -1,10 +1,10 @@
 {
-  "tag_name": "0.31.0",
-  "published_at": "2026-02-26T17:32:53Z",
+  "tag_name": "0.31.1",
+  "published_at": "2026-03-26T16:33:48Z",
   "platforms": {
-    "linux-aarch64": "1j4k3xy0ivk3kh5cqws57bdkmbkpaaqgs0al1anbj70ys76n0527",
-    "linux-amd64": "1dkh12i04hjnyyp7s1gmzs6vj4i4z5vx5yaq8bzr5jk8kf42lp2s",
-    "macos-aarch64": "12a82h7839wlxkg493482fi563gv9xsazh5h6k084ly36ap0551l",
-    "macos-amd64": "10l2frb3szgl47h95zm37df7isr0v8hc5l4h7d4bq9r3mkiwh74z"
+    "linux-aarch64": "0gh85lzv3bm2kr5q2m8c4nzn5ww6d7nbkgg79awiz4ma7ms0xwby",
+    "linux-amd64": "1gri2bdm29wd77yvysmwkpa8r11mfv9a3jy9x2zsyp3mbnai73v1",
+    "macos-aarch64": "13qfrbkwcin5nshpij75xxrfy9zspcdp4c3mi9wx4k32v4w58shv",
+    "macos-amd64": "07a759m3f2lf2inrvc371zxb0fgc1dzzfsacqnlay0scmva3w4i2"
   }
 }
