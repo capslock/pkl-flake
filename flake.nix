@@ -10,10 +10,12 @@
     nixpkgs,
     ...
   }: let
+    # Systems with a native pkl binary. Keep in sync with `platforms` in update.sh.
+    # Intel Macs (x86_64-darwin) are unsupported: pkl stopped publishing native
+    # binaries for them in 0.33.0.
     systemToPlatform = {
       x86_64-linux = "linux-amd64";
       aarch64-linux = "linux-aarch64";
-      x86_64-darwin = "macos-amd64";
       aarch64-darwin = "macos-aarch64";
     };
     current = builtins.fromJSON (builtins.readFile ./current.json);
@@ -66,7 +68,7 @@
           priority = 10;
         };
       };
-    supportedSystems = ["x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin"];
+    supportedSystems = builtins.attrNames systemToPlatform;
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     nixpkgsFor = forAllSystems (system:
       import nixpkgs {

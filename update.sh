@@ -2,6 +2,10 @@
 
 echo "Starting the update process..."
 
+# Release assets (pkl-<platform>) to hash. Keep in sync with systemToPlatform in flake.nix.
+platforms=(linux-amd64 linux-aarch64 macos-aarch64)
+platform_regex="^pkl-($(IFS='|'; echo "${platforms[*]}"))$"
+
 # Cleanup function to remove temporary files
 cleanup() {
     echo "Cleaning up temporary files..."
@@ -37,7 +41,7 @@ if [ "$needs_update" == "false" ]; then
 else
     echo "Update required. Processing..."
     hashes=""
-    for row in $(jq -c '.[0].assets[] | select(.name | test("^pkl-(linux-amd64|linux-aarch64|macos-aarch64|macos-amd64)$")) | {name, browser_download_url}' releases.json); do
+    for row in $(jq -c --arg re "$platform_regex" '.[0].assets[] | select(.name | test($re)) | {name, browser_download_url}' releases.json); do
         echo "Processing asset: $(echo "$row" | jq -r '.name')"
         if ! hash=$(nix-prefetch-url "$(echo "$row" | jq -r '.browser_download_url')" 2>/dev/null); then
             echo "Error: Failed to prefetch URL for $(echo "$row" | jq -r '.name'). Aborting..."
@@ -49,6 +53,12 @@ else
         fi
         if ! hashes=$(echo "$hashes" "$hash_json" | jq -s 'add'); then
             echo "Error: Failed to aggregate hashes. Aborting..."
+            exit 1
+        fi
+    done
+    for platform in "${platforms[@]}"; do
+        if ! echo "$hashes" | jq -e --arg p "$platform" 'has($p)' > /dev/null; then
+            echo "Error: Latest release has no pkl-${platform} asset. Aborting..."
             exit 1
         fi
     done
